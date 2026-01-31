@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkiye Bursları Strategic Advisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f4; color: #1f2937; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin: 0 auto; height: 400px; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .tab-active { border-bottom: 2px solid #0f766e; color: #0f766e; font-weight: 600; }
+        /* Custom scrollbar for table */
+        .custom-scroll::-webkit-scrollbar { height: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+    <!-- Chosen Palette: Academic Teal & Warm Sand (Teal #0f766e, Sand #f5f5f4, Orange #ea580c) -->
+    <!-- Application Structure Plan: 
+         1. Hero/Strategy Dashboard: Sets the mental model (Probability vs Prestige).
+         2. PDF Analysis Section: Reviews user's provided list, categorizing them as 'High Risk'.
+         3. The Strategic 12: The core recommendation engine with filters and detailed 'Why this uni?' data.
+         4. Comparison Matrix: A data-heavy view to compare specific metrics.
+         This structure moves from concept (strategy) to critique (PDF) to solution (The 12) to verification (Comparison).
+    -->
+    <!-- Visualization & Content Choices:
+         - Scatter Plot: To visualize the 'Sweet Spot' of high academic value but lower competition.
+         - Comparison Bars: To contrast the competition levels of Istanbul vs. Anatolian universities.
+         - Interactive List: To allow sorting/filtering the 12 recommendations by region or focus.
+         - NO SVG/Mermaid used. All icons are unicode or CSS shapes. Charts via Chart.js.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-50 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-teal-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-2">🇹🇷</span>
+                    <h1 class="font-bold text-xl tracking-wide">TB Strategy Advisor</h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <button onclick="scrollToSection('strategy')" class="hover:text-teal-200 transition">Strategy</button>
+                    <button onclick="scrollToSection('pdf-analysis')" class="hover:text-teal-200 transition">PDF Analysis</button>
+                    <button onclick="scrollToSection('recommendations')" class="hover:text-teal-200 transition bg-orange-600 px-4 py-2 rounded-md font-semibold hover:bg-orange-700">The Strategic 12</button>
+                </div>
+                <!-- Mobile menu button placeholder -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-white hover:text-teal-200 focus:outline-none">
+                        ☰
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-teal-900 pb-4">
+            <a href="#strategy" class="block px-4 py-2 text-white hover:bg-teal-800">Strategy</a>
+            <a href="#pdf-analysis" class="block px-4 py-2 text-white hover:bg-teal-800">PDF Analysis</a>
+            <a href="#recommendations" class="block px-4 py-2 text-white hover:bg-teal-800">The Strategic 12</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        
+        <!-- Section 1: Strategy Dashboard -->
+        <section id="strategy" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">The "Sweet Spot" Strategy</h2>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
+                    Most applicants target Istanbul and Ankara, creating massive competition. 
+                    Your goal is to find universities with <span class="text-teal-700 font-bold">High Academic Quality</span> but <span class="text-orange-600 font-bold">Medium Competition</span>.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                <!-- Text Insight -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-bold text-teal-800 mb-4">Why This Approach?</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-orange-500 mr-2">➤</span>
+                            <p class="text-sm text-gray-600"><strong>The Istanbul Trap:</strong> Universities like Boğaziçi or ITU receive thousands of applications for few spots.</p>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-teal-500 mr-2">➤</span>
+                            <p class="text-sm text-gray-600"><strong>The Anatolian Advantage:</strong> Cities like Konya, Kayseri, and Samsun have huge, well-funded campuses but fewer international applicants.</p>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-teal-500 mr-2">➤</span>
+                            <p class="text-sm text-gray-600"><strong>Strategic Neighbors:</strong> Sakarya and Kocaeli are close to Istanbul but technically outside, offering a "best of both worlds" scenario.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Visualization -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2 text-center">Competition vs. Quality Matrix</h3>
+                    <div class="chart-container">
+                        <canvas id="strategyChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-gray-400 mt-2">Data based on general application trends and university rankings.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: PDF Analysis (The Risk List) -->
+        <section id="pdf-analysis" class="bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Analysis of Your PDF Upload</h2>
+                    <p class="mt-2 text-gray-600">
+                        The universities listed in your PDF (e.g., Boğaziçi, ITU, Istanbul University) are the 
+                        <span class="text-red-600 font-semibold">most competitive in the country</span>. 
+                        While excellent, relying solely on these decreases your scholarship probability significantly unless you have a perfect academic profile.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto custom-scroll">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">University (From PDF)</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competition Level</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Strategic Verdict</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="pdfTableBody">
+                                <!-- JS will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Strategic 12 (Recommendations) -->
+        <section id="recommendations" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-0.5 rounded uppercase tracking-wide">Action Plan</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 mt-2">The Strategic 12</h2>
+                <p class="mt-4 text-gray-600 max-w-3xl mx-auto">
+                    This curated list mixes strong regional technical universities with major public institutions in secondary cities. 
+                    These choices balance <span class="font-bold">academic recognition</span> with <span class="font-bold">realistic acceptance chances</span>.
+                </p>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap justify-center gap-2 mb-8">
+                <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-teal-600 text-white shadow-md transition" data-filter="all">All Recommendations</button>
+                <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 transition" data-filter="Marmara">Marmara Region (Near Istanbul)</button>
+                <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 transition" data-filter="Central">Central Anatolia</button>
+                <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 transition" data-filter="Coastal">Coastal (Aegean/Med/Black Sea)</button>
+            </div>
+
+            <!-- The Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="universityGrid">
+                <!-- Cards will be injected here by JS -->
+            </div>
+
+            <!-- Detailed Comparison Table (Hidden by default, toggled via modal logic conceptualization) -->
+            <div class="mt-12 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Key Metrics Comparison</h3>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-gray-300 py-8">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <p class="mb-2">Generated for Türkiye Bursları Strategic Planning</p>
+                <p class="text-sm text-gray-500">Disclaimer: Acceptance relies on many factors including GPA, interview performance, and quota availability. This tool provides strategic advice based on general trends.</p>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Modal for University Details -->
+    <div id="uniModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-teal-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <span class="text-teal-600 font-bold text-xl">🎓</span>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">University Name</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500" id="modal-desc">Description goes here.</p>
+                                
+                                <div class="mt-4 grid grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 p-2 rounded">
+                                        <span class="block text-xs text-gray-400 uppercase">City Type</span>
+                                        <span class="font-semibold text-gray-800" id="modal-city">City</span>
+                                    </div>
+                                    <div class="bg-gray-50 p-2 rounded">
+                                        <span class="block text-xs text-gray-400 uppercase">Competition</span>
+                                        <span class="font-semibold text-gray-800" id="modal-comp">Level</span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <h4 class="text-sm font-bold text-teal-800 mb-1">Why this fits your strategy:</h4>
+                                    <p class="text-sm text-gray-600 bg-teal-50 p-3 rounded-md border border-teal-100" id="modal-strategy">Strategy reasoning.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white hover:bg-teal-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onclick="closeModal()">
+                        Got it
+                    </button>
+                    <a href="#" target="_blank" id="modal-link" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Visit Website
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Data: PDF Analysis (High Risk) ---
+        const pdfUniversities = [
+            { name: "Boğaziçi University", city: "Istanbul", comp: "Very High", verdict: "Reach School (Top 1%)" },
+            { name: "Istanbul Technical U (ITU)", city: "Istanbul", comp: "Very High", verdict: "Reach School (Top 5%)" },
+            { name: "Istanbul University", city: "Istanbul", comp: "High", verdict: "High Risk" },
+            { name: "Marmara University", city: "Istanbul", comp: "High", verdict: "High Risk" },
+            { name: "Yildiz Technical U", city: "Istanbul", comp: "High", verdict: "High Risk" },
+            { name: "Ankara University", city: "Ankara", comp: "High", verdict: "High Risk" },
+            { name: "Gazi University", city: "Ankara", comp: "High", verdict: "High Risk" },
+            { name: "Hacettepe University", city: "Ankara", comp: "Very High", verdict: "Reach School (Top Medicine/Eng)" }
+        ];
+
+        // --- Data: The Strategic 12 (Recommendations) ---
+        // Research based on "Good Quality but Less Popular Internationally"
+        const strategicUniversities = [
+            {
+                rank: 1,
+                name: "Sakarya University",
+                city: "Sakarya",
+                region: "Marmara",
+                type: "Midsized City",
+                comp: "Medium-High",
+                focus: "Engineering, Social Sciences",
+                strategy: "Only 1.5 hours from Istanbul. Massive international community but slightly less competitive than Istanbul giants. Excellent campus.",
+                risk: "Becoming more popular recently.",
+                website: "https://www.sakarya.edu.tr/"
+            },
+            {
+                rank: 2,
+                name: "Kocaeli University",
+                city: "Kocaeli (Izmit)",
+                region: "Marmara",
+                type: "Industrial Hub",
+                comp: "Medium",
+                focus: "Engineering, Automotive, Tech",
+                strategy: "Located in the industrial heart of Turkey. Huge internship opportunities. Close to Istanbul. Often overlooked by tourists.",
+                risk: "City is industrial, less 'scenic' than others.",
+                website: "https://www.kocaeli.edu.tr/"
+            },
+            {
+                rank: 3,
+                name: "Bursa Uludağ University",
+                city: "Bursa",
+                region: "Marmara",
+                type: "Major City",
+                comp: "Medium-High",
+                focus: "General, Medicine, Engineering",
+                strategy: "Bursa is a major, wealthy city. The uni is well-established. Good alternative to Istanbul for urban lifestyle.",
+                risk: "High regional demand.",
+                website: "https://www.uludag.edu.tr/"
+            },
+            {
+                rank: 4,
+                name: "Ondokuz Mayıs University",
+                city: "Samsun",
+                region: "Coastal",
+                type: "Regional Hub",
+                comp: "Medium",
+                focus: "Medicine, Pilotage, Agriculture",
+                strategy: "The academic hub of the Black Sea. Very active international office (`Uluslararası İlişkiler`). Beautiful campus with sea view.",
+                risk: "Far from Istanbul/Ankara.",
+                website: "https://www.omu.edu.tr/"
+            },
+            {
+                rank: 5,
+                name: "Erciyes University",
+                city: "Kayseri",
+                region: "Central",
+                type: "Midsized City",
+                comp: "Medium-Low",
+                focus: "Research, Medicine, Engineering",
+                strategy: "Designated 'Research University' (top tier status) but located in central Anatolia, lowering international competition compared to the West.",
+                risk: "Conservative city, colder climate.",
+                website: "https://www.erciyes.edu.tr/"
+            },
+            {
+                rank: 6,
+                name: "Selçuk University",
+                city: "Konya",
+                region: "Central",
+                type: "Major City",
+                comp: "Medium",
+                focus: "Law, Engineering, Humanities",
+                strategy: "One of the largest campuses in Turkey. Very low cost of living. Excellent facilities. High acceptance probability for good students.",
+                risk: "Conservative social life.",
+                website: "https://www.selcuk.edu.tr/"
+            },
+            {
+                rank: 7,
+                name: "Gaziantep University",
+                city: "Gaziantep",
+                region: "Southeast",
+                type: "Industrial/Food Hub",
+                comp: "Medium",
+                focus: "Engineering (English taught common)",
+                strategy: "Offers many programs 100% in English. Major industrial city. Unique culture and food. Strong strategic value.",
+                risk: "Location (Southeast) scares some, but city is safe and developed.",
+                website: "https://www.gantep.edu.tr/"
+            },
+            {
+                rank: 8,
+                name: "Çukurova University",
+                city: "Adana",
+                region: "Coastal",
+                type: "Major City",
+                comp: "Medium",
+                focus: "Agriculture, Engineering",
+                strategy: "Beautiful lakeside campus. Adana is a huge city. Warmer climate. Less international hype than Antalya.",
+                risk: "Very hot summers.",
+                website: "https://www.cu.edu.tr/"
+            },
+            {
+                rank: 9,
+                name: "Karadeniz Technical U (KTU)",
+                city: "Trabzon",
+                region: "Coastal",
+                type: "Regional Hub",
+                comp: "Medium",
+                focus: "Technical, Architecture, Marine",
+                strategy: "Historic university with deep roots. Very strong academically. Location (North East) filters out casual applicants.",
+                risk: "Rainy climate, distinct local culture.",
+                website: "https://www.ktu.edu.tr/"
+            },
+            {
+                rank: 10,
+                name: "Eskişehir Osmangazi U",
+                city: "Eskişehir",
+                region: "Central",
+                type: "Student City",
+                comp: "Medium",
+                focus: "Medicine, Engineering",
+                strategy: "Eskişehir is the best student city in Turkey. While Anadolu Uni is crowded, Osmangazi is a solid, slightly less competitive alternative.",
+                risk: "Still reasonably popular.",
+                website: "https://www.ogu.edu.tr/"
+            },
+            {
+                rank: 11,
+                name: "Manisa Celal Bayar U",
+                city: "Manisa",
+                region: "Coastal",
+                type: "Proximity Hub",
+                comp: "Low-Medium",
+                focus: "General",
+                strategy: "The 'Secret Izmir' strategy. Manisa is 30 mins from Izmir. You live near the cool city but apply to the less competitive uni.",
+                risk: "Smaller campus feel.",
+                website: "https://www.mcbu.edu.tr/"
+            },
+            {
+                rank: 12,
+                name: "Dokuz Eylül University",
+                city: "Izmir",
+                region: "Coastal",
+                type: "Mega City",
+                comp: "High (Strategic Reach)",
+                focus: "Business, Maritime, Arts",
+                strategy: "Your 'Reach' school. If you must pick a big city, pick Izmir over Istanbul. Dokuz Eylül is massive and prestigious but slightly easier than Ege U.",
+                risk: "High competition, but lower than Boğaziçi.",
+                website: "https://www.deu.edu.tr/"
+            }
+        ];
+
+        // --- Chart 1: Strategy Scatter Plot ---
+        function initStrategyChart() {
+            const ctx = document.getElementById('strategyChart').getContext('2d');
+            
+            // Data points representing different tiers of unis
+            const dataPoints = [
+                { x: 95, y: 10, r: 8, label: 'Boğaziçi/ODTÜ', color: '#ef4444' }, // High Fame, Low Prob
+                { x: 85, y: 25, r: 8, label: 'Istanbul U', color: '#f97316' },   // High Fame, Med-Low Prob
+                { x: 75, y: 65, r: 12, label: 'The Sweet Spot (Sakarya/Konya/etc)', color: '#0f766e' }, // The Goal
+                { x: 40, y: 90, r: 6, label: 'New/Rural Unis', color: '#64748b' } // Low Fame, High Prob
+            ];
+
+            new Chart(ctx, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'University Segments',
+                        data: dataPoints,
+                        backgroundColor: dataPoints.map(d => d.color)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw.label;
+                                }
+                            }
+                        },
+                        legend: { display: false },
+                        annotation: {
+                            annotations: {
+                                box1: {
+                                    type: 'box',
+                                    xMin: 60, xMax: 90,
+                                    yMin: 50, yMax: 80,
+                                    backgroundColor: 'rgba(15, 118, 110, 0.1)',
+                                    borderColor: '#0f766e',
+                                    borderWidth: 1,
+                                    label: { content: 'Target Zone', enabled: true }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'International Fame / Competition' },
+                            min: 0, max: 100
+                        },
+                        y: {
+                            title: { display: true, text: 'Scholarship Probability' },
+                            min: 0, max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Chart 2: Comparison Chart ---
+        function initComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Istanbul Giants (PDF)', 'Strategic Picks (The 12)', 'Rural/New Unis'],
+                    datasets: [
+                        {
+                            label: 'Competition Level',
+                            data: [95, 60, 30],
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Quality of Education',
+                            data: [95, 80, 50],
+                            backgroundColor: '#0f766e'
+                        },
+                        {
+                            label: 'Living Cost',
+                            data: [100, 60, 40],
+                            backgroundColor: '#f97316'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+
+        // --- DOM Population Functions ---
+
+        function renderPDFTable() {
+            const tbody = document.getElementById('pdfTableBody');
+            pdfUniversities.forEach(uni => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${uni.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${uni.city}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">${uni.comp}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic">${uni.verdict}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderStrategicCards(filter = 'all') {
+            const grid = document.getElementById('universityGrid');
+            grid.innerHTML = ''; // Clear existing
+
+            const filteredData = filter === 'all' 
+                ? strategicUniversities 
+                : strategicUniversities.filter(u => u.region.includes(filter) || u.region === filter);
+
+            filteredData.forEach(uni => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-md overflow-hidden card-hover border border-gray-100 flex flex-col h-full';
+                card.innerHTML = `
+                    <div class="p-6 flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">${uni.rank}. ${uni.name}</h3>
+                                <span class="text-sm text-teal-600 font-medium">${uni.city}</span>
+                            </div>
+                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">${uni.region}</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-3">${uni.strategy}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded">Comp: ${uni.comp}</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">${uni.type}</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                        <button onclick='openModal(${JSON.stringify(uni)})' class="w-full text-center text-teal-700 font-semibold text-sm hover:text-teal-900 transition">
+                            View Strategy & Details →
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- Interaction Logic ---
+
+        function openModal(uni) {
+            document.getElementById('modal-title').innerText = uni.name;
+            document.getElementById('modal-desc').innerText = uni.focus;
+            document.getElementById('modal-city').innerText = uni.type;
+            document.getElementById('modal-comp').innerText = uni.comp;
+            document.getElementById('modal-strategy').innerText = uni.strategy + " Risk Factor: " + uni.risk;
+            document.getElementById('modal-link').href = uni.website;
+            document.getElementById('uniModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('uniModal').classList.add('hidden');
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // --- Initialization ---
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initStrategyChart();
+            initComparisonChart();
+            renderPDFTable();
+            renderStrategicCards();
+
+            // Filter button logic
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Reset styles
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        b.classList.remove('bg-teal-600', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-600');
+                    });
+                    // Active style
+                    e.target.classList.remove('bg-white', 'text-gray-600');
+                    e.target.classList.add('bg-teal-600', 'text-white');
+                    
+                    renderStrategicCards(e.target.dataset.filter);
+                });
+            });
+
+            // Mobile Menu Toggle
+            document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
+
+            // Close modal on escape key
+            document.addEventListener('keydown', (e) => {
+                if(e.key === "Escape") closeModal();
+            });
+        });
+
+    </script>
+</body>
+</html>
